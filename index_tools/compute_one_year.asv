@@ -1,0 +1,195 @@
+% compute_one_year.m
+% Code designed to specifically handle AVO data.
+% It assumes subsamples (1 & 11) are organized into line 1 and 11.
+
+function results = compute_one_year(db,ship_list,survey_list,max_depth,classes,interval_min,time_max, plot_map_track, plot_nasc_track)
+
+if plot_map_track
+    plot_list = {'k.','r.','g.','b.'};
+    
+end
+grid_list = [];
+station_list = [];
+L = length(survey_list);
+full_lat = [];
+full_lon = [];
+full_nasc = [];
+cur_year = floor(cur_survey(1)/100);
+%% Get integration data
+for i=1:L
+    cur_ship = ship_list(i);
+    cur_survey = survey_list(i);
+    data{i} = get_integration_data(db, cur_ship, cur_survey, max_depth);
+    
+    % Index for the lines with the correct classes
+    indc = strcmp(data{i}.class,classes) ...
+        & seconds(datetime(data{i}.end_time)-datetime(data{i}.start_time))<time_max ...
+                   & data{i}.num_pings>=interval_min;
+    ind1 = data{i}.line == 1 & indc;
+    ind11 = data{i}.line == 11 & indc;
+    
+    if plot_map_track
+        if i==1
+            figure
+            title(sprintf('Ship tracks AVO year %s',num2str(floor(cur_survey/100))))
+        end
+       plot(data{i}.start_lon(ind1),data{i}.start_lat(ind1),plot_list{2*i-1})
+       legend(sprintf('ship %s SS 1',num2str(cur_ship),))
+       hold on
+       plot(data{i}.start_lon(ind11),data{i}.start_lat(ind11),plot_list{2*i})
+       legend(sprintf('ship %s SS 11',num2str(cur_ship)))
+       set(gca,'xdir','reverse')       
+    end
+    
+    % Generate list of unique grid cell ids to loop through later
+    grid_list = unique([grid_list;unique(data{i}.grid_id(indc))]);
+    station_list = unique([station_list;unique(data{i}.station_id(indc))]);
+    full_lat = [full_lat;data{i}.start_lat(indc)];
+    full_lon = [full_lon;data{i}.start_lon(indc)];
+    full_nasc = [full_nasc;data{i}.nasc(indc)];
+end
+
+if plot_nasc_track
+    figure
+    load G:\AADP_project\avobase\queries\matlab\ena_grid_cell_definitions.mat
+    load 200mbathy
+    load EBS_wpoli
+    for j=1:length(station_list)
+        [~, loc]=ismember(station_list{j},grid_cell_definitions.block_code);
+        if loc>0
+            cell_location.lon_center(j,1)=grid_cell_definitions.lon_center(loc);
+            cell_location.lat_center(j,1)=grid_cell_definitions.lat_center(loc);
+            cell_location.lon_perimeter(j,1)=grid_cell_definitions.lon_perimeter(loc);
+            cell_location.lat_perimeter(j,1)=grid_cell_definitions.lat_perimeter(loc);
+        end
+    end 
+    plot_log10INASC(-full_lon,full_lat,full_nasc,2)
+    hold on
+    for p=1:length(cell_location.lon_center)
+        [x,y]=m_ll2xy(cell2mat(cell_location.lon_perimeter(p)),cell2mat(cell_location.lat_perimeter(p)));
+        plot(x,y,'k')
+    end
+    title(sprintf('%s AVO pollock backscatter (38 kHz s_A, m^2 nmi^-^2)',cur_year))
+end
+
+%% Gather data for index
+% Cycle through each grid cell
+for g=1:length(grid_list)
+    cur_grid = grid_list(g);
+        % Compute an index for all data combined
+        sA = [];
+        dd = [];
+        sp = [];
+        dt = [];
+        comp_dd = [];
+        for i=1:L
+           cur_ind = strcmp(data{i}.class,classes) & data{i}.grid_id==cur_grid ...
+                   & seconds(datetime(data{i}.end_time)-datetime(data{i}.start_time))<time_max ...
+                   & data{i}.num_pings>=interval_min;
+           sA = [sA; data{i}.nasc(cur_ind)];
+           sp = [sp; data{i}.mean_speed(cur_ind)];
+           dd = [dd; data{i}.length(cur_ind)];
+           temp_dt = datetime(data{i}.end_time(cur_ind))-datetime(data{i}.start_time(cur_ind));
+           dt = [dt; seconds(temp_dt)];
+           comp_dd = [comp_dd; (seconds(temp_dt).*data{i}.mean_speed(cur_ind)./1.94)./1852];
+        end
+        
+        if ~isempty(sA)
+            grid_sA_weighted_by_dist(g) = sum(sA.*dd)/sum(dd);
+            grid_sA(g) = mean(sA);
+            total_dist(g) = sum(dd);
+            count(g) = length(sA);
+            mean_dist_diff(g) = mean(comp_dd-dd);
+        end
+        % Compute an index for each subsample separately to compare.
+        sA1 = [];
+        dd1 = [];
+        sp1 = [];
+        sA11 = [];
+        dd11 = [];
+        sp11 = [];
+        for i=1:L
+           cur_ind1 = data{i}.line == 1 & strcmp(data{i}.class,classes) & data{i}.grid_id==cur_grid ...
+                        & seconds(datetime(data{i}.end_time)-datetime(data{i}.start_time))<time_max ...
+                        & data{i}.num_pings>=interval_min;
+           sA1 = [sA1; data{i}.nasc(cur_ind1)];
+           sp1 = [sp1; data{i}.mean_speed(cur_ind1)];
+           dd1 = [dd1; data{i}.length(cur_ind1)];
+           
+           cur_ind11 = data{i}.line == 11 & strcmp(data{i}.class,classes) & data{i}.grid_id==cur_grid ...
+                        & seconds(datetime(data{i}.end_time)-datetime(data{i}.start_time))<time_max ...
+                        & data{i}.num_pings>=interval_min;
+           sA11 = [sA11; data{i}.nasc(cur_ind11)];
+           sp11 = [sp11; data{i}.mean_speed(cur_ind11)];
+           dd11 = [dd11; data{i}.length(cur_ind11)];
+        end
+        
+        if ~isempty(sA1)
+            grid_sA_weighted_by_dist1(g) = sum(sA1.*dd1)/sum(dd1);
+            grid_sA1(g) = mean(sA1);
+            total_dist1(g) = sum(dd1);
+            count1(g) = length(sA1);
+        else
+            grid_sA_weighted_by_dist1(g) = 0;
+            grid_sA1(g) = 0;
+            total_dist1(g) = 0;
+            count1(g) = 0;
+        end
+        if ~isempty(sA11)
+            grid_sA_weighted_by_dist11(g) = sum(sA11.*dd11)/sum(dd11);
+            grid_sA11(g) = mean(sA11);
+            total_dist11(g) = sum(dd11);
+            count11(g) = length(sA11);
+        else
+            grid_sA_weighted_by_dist1(g) = 0;
+            grid_sA1(g) = 0;
+            total_dist1(g) = 0;
+            count1(g) = 0;
+        end
+    
+end
+
+%% Combined estimates
+results.mean_sA_from_weighted_grids = mean(grid_sA_weighted_by_dist);
+results.mean_sA_from_weighted_grids_2wei = sum(grid_sA_weighted_by_dist.*count)/sum(count);
+results.grid_sA = grid_sA;
+results.grid_list = grid_list;
+results.count = count;
+mean_sA = mean(grid_sA);
+
+% SS1
+ind1 = count1>0;
+results.mean_sA_from_weighted_grids1 = mean(grid_sA_weighted_by_dist1(ind1));
+results.grid_sA1 = grid_sA1(ind1);
+results.grid_list1 = grid_list(ind1);
+results.count1 = count1(ind1);
+mean_sA1 = mean(grid_sA1(ind1));
+
+% SS11
+ind11 = count11>0;
+results.mean_sA_from_weighted_grids11 = mean(grid_sA_weighted_by_dist11(ind11));
+results.grid_sA11 = grid_sA11(ind11);
+results.grid_list11 = grid_list(ind11);
+results.count11 = count1(ind11);
+mean_sA11 = mean(grid_sA11(ind11));
+
+%% Statistics from the processing:
+% Counts of intervals by grid cell have been computed
+% Number of intervals rejected from minimum number of pings
+% Number of intervals rejected from max interval time
+% Both of the previous
+
+for i=1:L
+    cl_ind = strcmp(data{i}.class,classes);
+    min_ind = data{i}.num_pings<interval_min & cl_ind;
+    max_ind = seconds(datetime(data{i}.end_time)-datetime(data{i}.start_time))>time_max & cl_ind;
+    both_ind = min_ind | max_ind;
+    
+    results.total_ints(i) = sum(cl_ind);
+    results.number_rej_min_pings(i) = sum(min_ind);
+    results.number_rej_max_time(i) = sum(max_ind);
+    results.number_rej_total(i) = sum(both_ind);
+end
+
+
+

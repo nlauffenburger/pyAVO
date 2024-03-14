@@ -9,41 +9,40 @@ addpath('index_tools')
 
 % ouput path for saving plots and data (with a backslash at the end)
 output_path = 'G:\Taina\Fishing Vessel data collection\AVO nouveau\index_results\';
+output_path = 'C:\temp\AVO\';
 
 % Database credentials:
 source = 'afsc';
 user = 'avobase2';  
 password = 'pollock#024';
-db = dbOpen(source, user, password);
+db = dbOpen(source, user, password,'provider','ODBC');
 
 % Ship and survey lists
-% ship_list = [88, 89;
-%                 89, 454;
-%                 89, 454;
-%                 94, 454;
-%                 94, 454;
-%                 94, 454;
-%                 94, 454;
-%                 94, 454;
-%                 94, 454; 
-%                 94, 454;
-%                 94, 454;
-%                 134, 454];
-% survey_list = [200905, 200905;
-%                 201005, 201005;
-%                 201205, 201205;
-%                 201405, 201405;
-%                 201505, 201505;
-%                 201605, 201605;
-%                 201705, 201705;
-%                 201805, 201805;
-%                 201905, 201905; 
-%                 202105, 202105;
-%                 202205, 202205;
-%                 202305, 202305];
+ship_list = [88, 89;
+                89, 454;
+                89, 454;
+                94, 454;
+                94, 454;
+                94, 454;
+                94, 454;
+                94, 454;
+                94, 454; 
+                94, 454;
+                94, 454;
+                134, 454];
+survey_list = [200905, 200905;
+                201005, 201005;
+                201205, 201205;
+                201405, 201405;
+                201505, 201505;
+                201605, 201605;
+                201705, 201705;
+                201805, 201805;
+                201905, 201905; 
+                202105, 202105;
+                202205, 202205;
+                202305, 202305];
 
-ship_list = [134, 454];
-survey_list = [202305, 202305];
 
 % Processing parameters:
 % Classes for which backscatter combined
@@ -425,4 +424,12 @@ if compute_cog
     plot_CGI(CGlon,CGlat,all_years,output_path)
 end
 
-%save([output_path,'AVO_nouveau_data'])
+
+save([output_path,'AVO_data'],'ship_list','survey_list','all_years', ...
+             'grid_count','grid_count1','grid_count11', ...
+             'scaler','scaler1','scaler11', ...
+             'index','index_ss1','index_ss11', ...
+             'index_min_applied','index_min_applied1','index_min_applied11', ...
+             'rej_min_pings','rej_max_time','rej_total','total_ints','total_sA1','total_sA11', ...
+             'CGlon','CGlat','west_of_170','east_of_170', ...
+             'AVO_95_CI')

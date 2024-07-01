@@ -8,8 +8,8 @@ clear all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %datafilepath='\\nmfs.local\akc-race\GF_Acoustic\2021\EBS_2021_AlaskaKnight\tri-wave corrected\subsampled\';
 datafilepath='I:\2021\EBS_2021_Vesteraalen\AVO_new\SS_1\';
-EVfilepath='G:\Taina\Fishing Vessel data collection\AVO nouveau\2021\Vest EV files (nouveau)\SS_1\';
-template = 'G:\Taina\Fishing Vessel data collection\AVO nouveau\templates\Vest2021_template100521.EV';%ideally, the calibration file should already be in the template
+EVfilepath='G:\AVO\EV files and exports\2021\Vest EV files (nouveau)\SS_1\';
+template = 'G:\AVO\EV files and exports\templates\Vest2021_template100521.EV';%ideally, the calibration file should already be in the template
 ship = 'Vest'; %choose AKN, Vest, etc (if using this for Vesteraalen, make sure to comment out/ uncomment lines 80-81)
 subsample = '01'; %choose 01, 11, etc.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

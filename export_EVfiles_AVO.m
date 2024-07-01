@@ -24,12 +24,12 @@
 format compact
 
 %User-definable parameters:------------------------------------------------------------
-EVFilePath = 'G:\Taina\Fishing Vessel data collection\AVO nouveau\2021\Vest EV files (nouveau)\SS_1\';  %this is just a string variable; note that paths must end with a slash
+EVFilePath = 'G:\AVO\EV Files and exports\2021\Vest EV files (nouveau)\SS_1\';  %this is just a string variable; note that paths must end with a slash
 
-ExportFileBase = 'G:\Taina\Fishing Vessel data collection\AVO nouveau\2021\Vest_exports\SS_1\16m_to_3m_off_bottom\';   %this is just a string variable defining output path
+ExportFileBase = 'G:\AVO\EV Files and exports\2021\Vest_exports\SS_1\16m_to_3m_off_bottom\';   %this is just a string variable defining output path
 
 %ECSfilename= 'C:\python_code\AVO\export_script\AKN_2019_finalsurvey.ecs';  %set .ecs file (calibration file) to use.  
-ECSfilename= 'G:\Taina\Fishing Vessel data collection\AVO nouveau\2021\Vest_exports\Vest_2021_finalsurvey.ecs';  %set .ecs file (calibration file) to use.                                                                                                               %no trailing slash!
+ECSfilename= 'G:\AVO\EV Files and exports\2021\Vest_exports\Vest_2021_finalsurvey.ecs';  %set .ecs file (calibration file) to use.                                                                                                               %no trailing slash!
                                                                                                                
 %note that the names of these 2 variables changed for 2014
 

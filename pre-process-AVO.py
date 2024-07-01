@@ -81,20 +81,20 @@ start_time = []
 
 # Set load_params = {} if no loading desired
 load_params = {'user':'avobase2', 'schema':'avobase2', 
-                'password':'pollock#024','dsn':'afsc',
-                'survey_id':202305, 'ship_id':454, 'ss_list':[1, 11]}
+                'password':'Pollock#2468','dsn':'afsc',
+                'survey_id':202405, 'ship_id':134, 'ss_list':[1, 11]}
 
 # Path to raw data to be processed- need two trailing slashes \\
 # For now, within this directory, a new directory ('subsampled') will be created and sub directories for each iteration of subsample
 #input_path='I:\\2012\\EBS_2012_Aldebaran\\'
-input_path = 'F:\\AVO\\AK_2023\\'
+input_path = 'H:\\AVO\\NWX_2024\\'
 
 
 # Path to location where to create subsample directories- need two trailing slashes \\
 # Leave empty if they should be created as subfolders in the input_path directory
 #output_path='C:\\python_code\\AVO\\triwave_test\\new_corrected\\'
 #output_path = 'C:\\temp\\temp\\'
-output_path = 'F:\\AVO\\AK_2023\\'
+output_path = 'H:\\AVO\\NWX_2024\\'
 
 # How much data process at once (required):
 # size_unit is the definition for how to count the amount of data.  
@@ -112,7 +112,7 @@ size_info = {'size_unit':'hour',
 # chunk_start is the starting ping for first subsample chunk: If this is greater than 100/percent_ss, it will be reduced to the integer between 1 and 100/percent_ss
 # iterations is the number of subsample sets to produce: If this is greater than 100/percent, it will be set to 100/percent
 # ss_params={} if no subsampling
-ss_params = {'percent':1,
+ss_params = {'percent':5,
                     'chunk_size':50, 
                     'chunk_start':1, 
                     'iterations':20}
@@ -158,7 +158,7 @@ ss_params = {'percent':1,
 
 #filter_params={'time_limit':'C:\\python_code\\echolab\\saildrone-pre-processing\\data\\csv\\saildrone_south.csv', 'ringdown': [61, 0.1, 0, 3], 'bottom':[61, 15, 9999, 6, -30]}
 #filter_params = {'latlon_limit': 'C:\\python_code\\AVO\\geo_test\\EBS_bounds.csv'}
-filter_params = {'latlon_limit': ['C:\\python_code\\AVO\\testing\\geo_test\\EBS_bounds.shp', 'in'],
+filter_params = {'latlon_limit': ['G:\\AVO\Code\\pyAVO\\pyAVO2\\EBS_bounds.shp', 'in'],
                         'time_limit': ['use_solar_angle', 0],  
                         'speed_limit': 4, 
                         'ringdown': [61, 0.1, 0, 1], 
@@ -182,7 +182,7 @@ pr_params = {'statistic_interval': 50,
                         'threshold_to_remove': 15}
 
 
-map_params = {'save': True, 'grids': 'C:\\python_code\\AVO\\testing\\geo_test\\BT_grids.shp'}
+map_params = {'save': True, 'grids': 'G:\\AVO\Code\\pyAVO\\pyAVO2\\BT_grids.shp'}
 
 #
 # BEGIN PROCESSING CODE

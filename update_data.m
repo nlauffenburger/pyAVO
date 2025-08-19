@@ -5,8 +5,8 @@
 AVO_95_CI = [0.1664,0.2471,0.1587,0.2476,0.1733,0.1618,0.1354,0.1088,0.271,0.2261,0.1940,0.1431]*10^(6);
 
 % Path to the time series data mat file and the new year's data folder
-data_path = 'G:\AVO\Index results\testing\';
-current_year = 2023;
+data_path = 'G:\AVO\Index results\';
+current_year = 2024;
 
 
 %% Load historic data and new data, append new data and save

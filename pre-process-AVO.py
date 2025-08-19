@@ -51,7 +51,7 @@ import pandas as pd
 
 # Parameterize some of the processing.  Later, we will allow user to pass these into this script or read from an init file
 # Instrument name: 'EK60' or 'EK80'
-instrument = 'EK60'
+instrument = 'EK80'
 # Minimum number of pings left after filtering to write a new file
 minimum_pings_to_write = 1
 # write the original data with no subsampling or filter to reference.  A single file for the time/length specified will be output before subsampling & filtering
@@ -65,12 +65,12 @@ primary_frequency = 38000
 # Combine out files into one that holds all bottom data for the output raw file.
 # This isn't really necessary for processing 1 raw file at a time or if lines are processed together, but as soon as
 # written raw files cross over line numbers or many raw files are merged, it is best to make new out files so EV can use them properly.
-merge_out_data = True
+merge_out_data = False
 # start processing at a specified time- 
 # either leave empty for process all, 
 # or a list with one for date and time ['yyyymmdd','hhmmss']
 #start_time = ['20230603', '081050']
-start_time = []
+start_time = ['20250624','150055']
 
 # fill database with data files that have been procesed, 
 
@@ -82,19 +82,19 @@ start_time = []
 # Set load_params = {} if no loading desired
 load_params = {'user':'avobase2', 'schema':'avobase2', 
                 'password':'Pollock#2468','dsn':'afsc',
-                'survey_id':202405, 'ship_id':134, 'ss_list':[1, 11]}
+                'survey_id':202505, 'ship_id':454, 'ss_list':[1, 11]}
 
 # Path to raw data to be processed- need two trailing slashes \\
 # For now, within this directory, a new directory ('subsampled') will be created and sub directories for each iteration of subsample
 #input_path='I:\\2012\\EBS_2012_Aldebaran\\'
-input_path = 'H:\\AVO\\NWX_2024\\'
+input_path = 'H:\\AVO\\AK_2025\\'
 
 
 # Path to location where to create subsample directories- need two trailing slashes \\
 # Leave empty if they should be created as subfolders in the input_path directory
 #output_path='C:\\python_code\\AVO\\triwave_test\\new_corrected\\'
 #output_path = 'C:\\temp\\temp\\'
-output_path = 'H:\\AVO\\NWX_2024\\'
+output_path = 'H:\\AVO\\AK_2025\\'
 
 # How much data process at once (required):
 # size_unit is the definition for how to count the amount of data.  
@@ -158,11 +158,27 @@ ss_params = {'percent':5,
 
 #filter_params={'time_limit':'C:\\python_code\\echolab\\saildrone-pre-processing\\data\\csv\\saildrone_south.csv', 'ringdown': [61, 0.1, 0, 3], 'bottom':[61, 15, 9999, 6, -30]}
 #filter_params = {'latlon_limit': 'C:\\python_code\\AVO\\geo_test\\EBS_bounds.csv'}
+
+# AK Knight 2025
+#filter_params = {'latlon_limit': ['G:\\AVO\Code\\pyAVO\\pyAVO2\\EBS_bounds.shp', 'in'],
+#                        'time_limit': ['use_solar_angle', 0],  
+#                        'speed_limit': 4, 
+#                        'ringdown': [61, 0.1, 0, 1], 
+#                        'bottom': ['fixed', 15, 9999, 0.5, 1.5, -40, True]}
+
+# NW Exp 2025
 filter_params = {'latlon_limit': ['G:\\AVO\Code\\pyAVO\\pyAVO2\\EBS_bounds.shp', 'in'],
                         'time_limit': ['use_solar_angle', 0],  
                         'speed_limit': 4, 
                         'ringdown': [61, 0.1, 0, 1], 
-                        'bottom': ['fixed', 15, 9999, 0.5, 1.5, -40, True]}
+                        'bottom': ['fixed', 15, 9999, 0, 2, -40, True]}
+                        
+#filter_params = {'latlon_limit': ['G:\\AVO\Code\\pyAVO\\pyAVO2\\EBS_bounds.shp', 'in'],
+#                        'time_limit': ['use_solar_angle', 0],  
+#                        'speed_limit': 4, 
+#                        'ringdown': [61, 0.1, 0, 1], 
+#                        'bottom': ['relative', 15, 9999, 0, 1.5, 61, True, 1]}
+                        
 
 # Extra operation (optional)
 # It will look in here and perform anything requested

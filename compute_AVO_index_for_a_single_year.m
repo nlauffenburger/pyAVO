@@ -28,17 +28,17 @@ addpath('index_tools')
 % Output path for saving data for the current year (with a backslash at the end)
 % A folder with the current year as the name will be made within this
 % folder
-index_path = 'G:\AVO\Index results\testing\';
+index_path = 'G:\AVO\Index results\';
 
 % Database credentials:
 source = 'afsc';
 user = 'avobase2';  
-password = 'pollock#024';
+password = 'Pollock#2468';
 db = dbOpen(source, user, password,'provider','ODBC');
 
 % Ship and survey list for the current year
 ship_list = [134, 454];
-survey_list = [202305, 202305];
+survey_list = [202405, 202405];
 
 %% More set up that normally doesn't need to be edited
 

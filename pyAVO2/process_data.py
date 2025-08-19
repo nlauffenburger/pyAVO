@@ -162,8 +162,8 @@ class Process():
             
         # Find the first file with path in the list and find the base name without path attached
         start_file = file_list[0]
-        start_file_base_name = start_file[start_file.rfind('\\')+7:]
-        orig_line_prefix = start_file[start_file.rfind('\\')+1:start_file.rfind('\\')+6]
+        start_file_base_name = start_file[start_file.rfind('\\')+5:]
+        orig_line_prefix = start_file[start_file.rfind('\\')+1:start_file.rfind('\\')+4]
         
         # Do some channel organization and clean up here
         # Make sure 38 (primary, set at the beginning) is read first, 
@@ -205,7 +205,7 @@ class Process():
                 logging.error("There were two raw data objects for one frequency and could not determine the cause, so skipping {}".format(file_list))
                 return False,  False
             
-            # Now check to see if this  is the primary frequency to base index for others off of
+            # Now check to see if this is the primary frequency to base index for others off of
             # If so, keep track and make sure primary is the first in the list
             if key == self.primary_frequency:
                 channel_list.insert(0, value[0])
@@ -217,6 +217,7 @@ class Process():
         # It will be applied to the first iteration and then it does not need to be applied in the subsequent iterations.
         # Save the original state so that the processing class can be set to the original state at the end.
         wrote_a_raw_file = False
+        wrote_an_evl_file = False
         tw_correct = self.triwave_params['do_triwave']
         for iters in range(self.ss_params['iterations']):
             # After performing all the operations, we need to know whether at least one channel will be empty
@@ -276,17 +277,20 @@ class Process():
                                     else:
                                         logging.info("Successfully read bottom data from {}".format(out_list))
                                 else:
-                                    logging.info("There was a problem reading bottom data from {} file, will detect bottom".format(out_list))
+                                    logging.info("There was no bottom data available, will detect bottom")
                                     self.process_settings['detect_bottom'] = True
                                     bottom_data = []
                             else:
                                 bottom_data = None
                             # If bottom data is not available, detect it
                             if self.process_settings['detect_bottom']:
-                                bot_detector = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=35)
+                                # For NWExp 2025:
+                                bot_detector = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=40)
+                                # For AK Knight 2025
+                                #bot_detector, max_sample_range = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=40)
                                 Sv_data = data.get_Sv()
 #                                try:
-                                bottom_data, _= bot_detector.detect(Sv_data) 
+                                bottom_data, max_bottom_range= bot_detector.detect(Sv_data) 
                                 logging.info("Successfully detected bottom data for {}".format(file_list))
 #                                except:
 #                                    logging.info("Error in detecting bottom data for {}".format(file_list))
@@ -338,12 +342,12 @@ class Process():
                             if iters == 0:
                                 if self.filter_settings['need_gps_data']:
                                     if 'bottom' in self.filter_params:
-                                        idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data, bottom_data=bottom_data.data)
+                                        idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data, bottom_data=bottom_data.data, max_bottom_range = max_bottom_range)
                                     else:
                                         idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data)
                                 else:
                                     if 'bottom' in self.filter_params:
-                                        idx_filt_array, val  = self.filterer.do_all_filtering(data, bottom_data=bottom_data.data)
+                                        idx_filt_array, val  = self.filterer.do_all_filtering(data, bottom_data=bottom_data.data, max_bottom_range = max_bottom_range)
                                     else:
                                         idx_filt_array, val  = self.filterer.do_all_filtering(data)
                                 
@@ -425,6 +429,44 @@ class Process():
                 ek.write_raw(out_file_name, raw_index_array=raw_index_array, overwrite=True, progress_callback=self.read_write_callback)
                 logging.info("Finished writing raw data to file(s) {}".format(out_file_name))
                 wrote_a_raw_file = True
+                
+                # Write bottom file
+                if self.process_settings['detect_bottom']:
+                    print('Writing bottom line file(s)')
+                    depths = bottom_data.data
+                    # Builld up the format for an evl:  YYYYMMDD HHmmssssss depth 3
+                    dates = bottom_data.ping_time
+                    years = dates.astype('datetime64[Y]').astype(int) + 1970
+                    months = dates.astype('datetime64[M]').astype(int) % 12 + 1
+                    days = (dates.astype('datetime64[D]') - dates.astype('datetime64[M]')).astype(int) + 1
+                    base_bot_file_name = ss_line_prefix+'-'+start_file_base_name[0:-4]+file_suffix[:-4]+'.evl'
+                    bot_file_name = out_dir+base_bot_file_name
+                    first_one = True
+                    with open(bot_file_name, 'w') as f:
+                        f.write('EVBD 3 13.0.396.45257\n'+str(np.sum(list(raw_index_array.values())[0]))+' \n')
+                        for y, m, d, t, depth, mask in zip(years, months, days, dates, depths, list(raw_index_array.values())[0]):
+                            if mask:
+                                # first column
+                                day = str(d)
+                                if len(day)==1:
+                                    day = '0'+day
+                                month = str(m)
+                                if len(month)==1:
+                                    month = '0'+month
+                                first = str(y)+month+day
+                                # second column
+                                t_string = str(t)
+                                time_string = t_string[t_string.find('T')+1:-1]
+                                time_string = time_string.replace(':', '')
+                                time_string = time_string.replace('.', '')
+                                if first_one:
+                                    second = time_string+'00'
+                                    first_one = False
+                                else:
+                                    second = time_string+'99'
+                            
+                                f.write(first+' '+second+' '+str(depth)+' '+'3 \n')
+                    wrote_an_evl_file = True
                 if cur_iter+1 in self.load_params['ss_list']:
                     # Need to check if this data file is already in there
                     val = self.db_cursor.get_datafile(self.load_params['ship_id'], self.load_params['survey_id'],
@@ -445,8 +487,26 @@ class Process():
                     else:
                         logging.info("Data file {} is already in the data files table".format(ss_line_prefix+'-'+start_file_base_name[0:-4]+file_suffix))
                         
-                
-                
+                    if self.process_settings['detect_bottom']:
+                        val = self.db_cursor.get_datafile(self.load_params['ship_id'], self.load_params['survey_id'],
+                            base_bot_file_name)
+                        if not val:
+                            # If it isn't in the database already, insert it
+                            self.db_cursor.insert_datafile(self.load_params['ship_id'], self.load_params['survey_id'], return_id=False,
+                                line=int(cur_iter+1), file_name=base_bot_file_name,
+                                start_time=pd.Timestamp(data.ping_time[idx_array_primary][0]),
+                                end_time=pd.Timestamp(data.ping_time[idx_array_primary][-1]),
+                                n_pings=int(sum(idx_array_primary)),
+                                clock_adj=0,
+                                mean_skew=0,
+                                stddev_skew=0,
+                                status=avo_db.StatusCodes.UNCHECKED)
+                            
+                            logging.info("Finished inserting data file {} info to data_files table".format(base_bot_file_name))
+                        else:
+                            logging.info("Data file {} is already in the data files table".format(base_bot_file_name))
+                        
+
             else:
                 logging.info("Did not write raw data to file, number of pings left did not exceed minimum pings")
             
@@ -521,7 +581,7 @@ class Process():
         self.triwave_params['do_triwave'] = tw_correct
         
         self.db_manager.commit()
-        return True, wrote_a_raw_file
+        return True, wrote_a_raw_file, wrote_an_evl_file
     
     def mark_bad_gps_data(self, gps_data):
         st_lat = gps_data['latitude'][:-1]

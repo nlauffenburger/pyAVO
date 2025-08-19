@@ -17,12 +17,12 @@ from pyAVO2 import csv_loader,  avo_db
 frequency = 38000
 
 # csv output directory from EV exports (no slashes at the end)
-csvDir = 'G:\\Taina\\Fishing Vessel data collection\\AVO nouveau\\2023\\NWX_exports\\SS_11\\16m_to_3m_off_bottom\\'
+csvDir = 'G:\\AVO\\EV Files and exports\\2024\\NWX_exports\\SS_11\\16m_to_3m_off_bottom\\temp\\'
 
 # Specify database credentials for connection
 load_params = {'user':'avobase2', 'schema':'avobase2', 
-                'password':'pollock#024','dsn':'afsc',
-                'survey_id':202305, 'ship_id':134}
+                'password':'Pollock#2468','dsn':'afsc',
+                'survey_id':202405, 'ship_id':134}
                 
 #  specify the EV export format to use. Valid values are 0 or 1. I think early exports
 #  lacked a few fields and are format 0. More recent exports are format 1.

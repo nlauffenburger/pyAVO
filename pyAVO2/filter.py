@@ -27,7 +27,7 @@ class Filter():
         self.pr_params = pr_params
         self.filtered_arrays = {}
         
-    def do_all_filtering(self, data, gps_data=None, bottom_data=None):
+    def do_all_filtering(self, data, gps_data=None, bottom_data=None, max_bottom_range=None):
         '''
         Method to perform all the filtering that is specified by the filter params dictionary
         Will go through each filter and call appropriate method
@@ -60,7 +60,7 @@ class Filter():
             elif filt == 'latlon_limit':
                 idx_filt_array, val = self.filter_by_latlon(vals, gps_data)
             elif filt == 'bottom':
-                idx_filt_array, val = self.bottom_filter(data, vals, bottom_data=bottom_data)
+                idx_filt_array, val = self.bottom_filter(data, vals, bottom_data=bottom_data, max_bottom_range=max_bottom_range)
             elif filt == 'ringdown':
                 idx_filt_array, val = self.ringdown_filter(data, vals)
             else:
@@ -214,7 +214,7 @@ class Filter():
         
         return np.array(idx_array), True
         
-    def bottom_filter(self, data, vals, bottom_data):
+    def bottom_filter(self, data, vals, bottom_data, max_bottom_range):
         '''
         Remove pings with Sv that varies from the running median of Sv mean (computed in linear)
         in a specified range of max Sv (near the bottom).
@@ -229,22 +229,24 @@ class Filter():
         :returns boolean for sucess of filter
         '''
         # Check number of filtering params
-        if len(vals) != 6 and len(vals) != 7:
+        if len(vals) != 7 and len(vals) != 8:
             logging.warning('Incorrect number input values for bottom filtering')
             return False, False
         
         # If there are no bottom data, then cannot perform this filter
-        if bottom_data == [] or bottom_data is None:
+        if bottom_data == [] or bottom_data is None or max_bottom_range is None:
             logging.warning('No bottom data available for bottom filtering')
             return False,  False
         
         type = vals[0]
         
         # Find Sv
-        Sv=data.get_Sv()
-        range_ind=np.logical_and(Sv.range>vals[1], Sv.range<vals[2])
-        mean_bottoms=[]
-        for ping, bot, t_depth in zip(Sv, bottom_data, data.transducer_depth):
+        Sv = data.get_Sv()
+        range_ind = np.logical_and(Sv.range>vals[1], Sv.range<vals[2])
+        mean_bottoms = []
+        top_line = []
+        bottom_line = []
+        for ping, bot, t_depth, range in zip(Sv, bottom_data, Sv.transducer_offset, max_bottom_range):
             if not np.isnan(np.nanmax(ping[range_ind])):
                 #max_Sv=np.nanmax(ping[range_ind])
                 #max_ind=np.where(ping==max_Sv)
@@ -252,11 +254,13 @@ class Filter():
                         bot = bot-t_depth
                 env_upper = bot-vals[3]
                 env_lower = bot+vals[4]
+                top_line.append(env_upper)
+                bottom_line.append(env_lower)
                 env_ind = np.logical_and(Sv.range >= env_upper, Sv.range<=env_lower)
                 if type == 'fixed':
                     mean_bottoms = np.append(mean_bottoms, 10*np.log10(np.median(10**(ping[env_ind]/10))))
                 elif type == 'relative':
-                    mean_bottoms = np.append(mean_bottoms, 10*np.log10(np.mean(10**(ping[env_ind]/10))))
+                    mean_bottoms = np.append(mean_bottoms, 10*np.log10(np.median(10**(ping[env_ind]/10))))
             else:
                 mean_bottoms=np.append(mean_bottoms, np.nan)
        

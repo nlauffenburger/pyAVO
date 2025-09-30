@@ -27,7 +27,7 @@ class Filter():
         self.pr_params = pr_params
         self.filtered_arrays = {}
         
-    def do_all_filtering(self, data, gps_data=None, bottom_data=None, max_bottom_range=None):
+    def do_all_filtering(self, data, gps_data=None, bottom_data=None):
         '''
         Method to perform all the filtering that is specified by the filter params dictionary
         Will go through each filter and call appropriate method
@@ -60,7 +60,7 @@ class Filter():
             elif filt == 'latlon_limit':
                 idx_filt_array, val = self.filter_by_latlon(vals, gps_data)
             elif filt == 'bottom':
-                idx_filt_array, val = self.bottom_filter(data, vals, bottom_data=bottom_data, max_bottom_range=max_bottom_range)
+                idx_filt_array, val = self.bottom_filter(data, vals, bottom_data=bottom_data)
             elif filt == 'ringdown':
                 idx_filt_array, val = self.ringdown_filter(data, vals)
             else:
@@ -214,7 +214,7 @@ class Filter():
         
         return np.array(idx_array), True
         
-    def bottom_filter(self, data, vals, bottom_data, max_bottom_range):
+    def bottom_filter(self, data, vals, bottom_data):
         '''
         Remove pings with Sv that varies from the running median of Sv mean (computed in linear)
         in a specified range of max Sv (near the bottom).
@@ -234,7 +234,7 @@ class Filter():
             return False, False
         
         # If there are no bottom data, then cannot perform this filter
-        if bottom_data == [] or bottom_data is None or max_bottom_range is None:
+        if bottom_data == [] or bottom_data is None:
             logging.warning('No bottom data available for bottom filtering')
             return False,  False
         
@@ -246,7 +246,7 @@ class Filter():
         mean_bottoms = []
         top_line = []
         bottom_line = []
-        for ping, bot, t_depth, range in zip(Sv, bottom_data, Sv.transducer_offset, max_bottom_range):
+        for ping, bot, t_depth in zip(Sv, bottom_data, Sv.transducer_offset):
             if not np.isnan(np.nanmax(ping[range_ind])):
                 #max_Sv=np.nanmax(ping[range_ind])
                 #max_ind=np.where(ping==max_Sv)

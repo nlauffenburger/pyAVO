@@ -70,7 +70,7 @@ merge_out_data = False
 # either leave empty for process all, 
 # or a list with one for date and time ['yyyymmdd','hhmmss']
 #start_time = ['20230603', '081050']
-start_time = ['20250624','150055']
+start_time = ['20250725','213643']
 
 # fill database with data files that have been procesed, 
 

@@ -73,7 +73,7 @@ z=log10(z+1);  %apply log transformation to data
     %construct colormap
     %colormap gray  %use this if you want b&w colormap
     %getcolormap=flipud(colormap);  %use this if you plot low points last
-    colormap(jet)
+    colormap(flipud(brewermap([],'Spectral')))
     getcolormap=colormap;  %use this if you plot high points last
     %count=find(z>0);              %comment thexe lines and instead,
     %datamin=min(min(z(count)));   %use 0 as beginning of color scale, PHR
@@ -89,9 +89,9 @@ z=log10(z+1);  %apply log transformation to data
         datamax=scale_limits(2);
     else
         %datamin=0
-        datamin=-1e-016;  %use this instead of zero to make the color bar display zero
+        datamin=1;  %use this instead of zero to make the color bar display zero
         %datamax=3.1  %2.8 for autokrill?  %3.1 for autopollock?
-        datamax=4.1;  %4.1 for AVO nouveau 2009-2023
+        datamax=3.5;  %4.1 for AVO nouveau 2009-2023
         %comment out previous and use 5th-95th percentile for color scale
         %disp('using 98th percentile as upper end of color scale')
         %datamin=0

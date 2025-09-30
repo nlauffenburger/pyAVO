@@ -38,7 +38,7 @@ db = dbOpen(source, user, password,'provider','ODBC');
 
 % Ship and survey list for the current year
 ship_list = [134, 454];
-survey_list = [202405, 202405];
+survey_list = [202505, 202505];
 
 %% More set up that normally doesn't need to be edited
 

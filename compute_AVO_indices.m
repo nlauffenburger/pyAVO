@@ -14,11 +14,13 @@ output_path = 'C:\temp\AVO\';
 % Database credentials:
 source = 'afsc';
 user = 'avobase2';  
-password = 'pollock#024';
+password = 'Pollock#2468';
 db = dbOpen(source, user, password,'provider','ODBC');
 
 % Ship and survey lists
-ship_list = [88, 89;
+ship_list = [134, 454;
+                134, 454;
+                88, 89;
                 89, 454;
                 89, 454;
                 94, 454;
@@ -30,7 +32,9 @@ ship_list = [88, 89;
                 94, 454;
                 94, 454;
                 134, 454];
-survey_list = [200905, 200905;
+survey_list = [202405, 202405;
+                202505, 202505
+                200905, 200905;
                 201005, 201005;
                 201205, 201205;
                 201405, 201405;
@@ -62,14 +66,14 @@ time_max = 150;
 % intervals in a cell below that to remove for an alternative estimate
 min_number_intervals = 2;
 % Flags for output
-plot_map_track = true;
+plot_map_track = false;
 plot_nasc_track = true;
 save_track_sA = true;
-plot_nasc_hist = true;
+plot_nasc_hist = false;
 plot_nasc_grid = true;
 compute_index_for_old_area = false;
-compute_transects = true;
-compute_cog = true;
+compute_transects = false;
+compute_cog = false;
 %Use nominal EBS area as 2.5*10^5 km^2 = 102043.62 nmi^2
 ebs_area = 102043.62;
 

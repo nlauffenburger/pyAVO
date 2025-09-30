@@ -242,6 +242,15 @@ class Process():
             # Create the empty raw index dictionary
             raw_index_array = {}
                     
+            # Begin by matching the pings between the frequencies.
+            # Do this by remove only on all frequencies
+            for channel in channel_list:
+                data = ek.raw_data[channel][0]
+                for channel_comp in channel_list:
+                    data_comp = ek.raw_data[channel_comp][0]
+                    if data_comp != data:
+                        data.match_pings(data_comp, remove_only=True)
+                    
             # first, iterate through the channels we have read (starting with 38)
             for channel in channel_list:
                 # And then the data objects associated with each channel
@@ -284,10 +293,10 @@ class Process():
                                 bottom_data = None
                             # If bottom data is not available, detect it
                             if self.process_settings['detect_bottom']:
-                                # For NWExp 2025:
-                                bot_detector = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=40)
-                                # For AK Knight 2025
-                                #bot_detector, max_sample_range = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=40)
+                                # For NWExp 2025- this was used for 2025 but it often went over fish near the bottom.  A better value is probably closer to 30, but should be tested in 2026
+                                #bot_detector = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=40)
+                                # For AK Knight 2025- this value of 20 worked well.
+                                bot_detector = afsc_bot_detector.afsc_bot_detector(search_min=15, backstep=20)
                                 Sv_data = data.get_Sv()
 #                                try:
                                 bottom_data, max_bottom_range= bot_detector.detect(Sv_data) 
@@ -342,12 +351,12 @@ class Process():
                             if iters == 0:
                                 if self.filter_settings['need_gps_data']:
                                     if 'bottom' in self.filter_params:
-                                        idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data, bottom_data=bottom_data.data, max_bottom_range = max_bottom_range)
+                                        idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data, bottom_data=bottom_data.data)
                                     else:
                                         idx_filt_array, val = self.filterer.do_all_filtering(data, gps_data=gps_data)
                                 else:
                                     if 'bottom' in self.filter_params:
-                                        idx_filt_array, val  = self.filterer.do_all_filtering(data, bottom_data=bottom_data.data, max_bottom_range = max_bottom_range)
+                                        idx_filt_array, val  = self.filterer.do_all_filtering(data, bottom_data=bottom_data.data)
                                     else:
                                         idx_filt_array, val  = self.filterer.do_all_filtering(data)
                                 
@@ -373,7 +382,6 @@ class Process():
                             
                         # Save subsampling array and data from primary (typically 38 kHz)
                         idx_array_primary = idx_array.copy()
-                        data_primary = data.copy()
                         
                         # Save echogram image of primary frequency data in first iteration
                         if self.make_echogram and iters == 0:
@@ -396,10 +404,6 @@ class Process():
                             fig.savefig(self.output_path+'echograms\\'+start_file_base_name[0:-4], dpi=1200)
                             plt.close(fig)
                     else:
-                        # If this is not the primary frequency, match pings to it
-                        # Match pings to primary, which has been subampled and filtered
-                        data.match_pings(data_primary)
-                        logging.info('Subsampling and filtering from primary frequency was matched to secondary frequency.')
                         # Use subsampled and filtered array from primary (typically 38 kHz)
                         idx_array = idx_array_primary
 

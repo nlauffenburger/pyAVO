@@ -2,16 +2,16 @@
 % Run this after generating the index for the current year
 % Code to update figures and data from the full AVO (nouveau) time series
 
-AVO_95_CI = [0.1664,0.2471,0.1587,0.2476,0.1733,0.1618,0.1354,0.1088,0.271,0.2261,0.1940,0.1431]*10^(6);
+AVO_95_CI = [0.1664,0.2471,0.1587,0.2476,0.1733,0.1618,0.1354,0.1088,0.271,0.2261,0.1940,0.1431,0.107020,0.25744415]*10^(6);
 
 % Path to the time series data mat file and the new year's data folder
 data_path = 'G:\AVO\Index results\';
-current_year = 2024;
+current_year = 2025;
 
 
 %% Load historic data and new data, append new data and save
 save_path = [data_path,num2str(current_year),'\'];
-load([data_path,'AVO_data'])
+load([data_path,'AVO_data_through_2024'])
 load([save_path,num2str(current_year)])
 
 CGlat_all = [CGlat_all,CGlat];
@@ -40,14 +40,14 @@ total_ints_all = [total_ints_all, total_ints];
 total_sA11_all = [total_sA11_all, total_sA11];
 total_sA1_all = [total_sA1_all, total_sA1];
 
-save([data_path,'AVO_data_through_',num2str(current_year)],'ship_list_all','survey_list_all','all_years_all', ...
-             'grid_count_all','grid_count1_all','grid_count11_all', ...
-             'scaler_all','scaler1_all','scaler11_all', ...
-             'index_all','index_ss1_all','index_ss11_all', ...
-             'index_min_applied_all','index_min_applied1_all','index_min_applied11_all', ...
-             'rej_min_pings_all','rej_max_time_all','rej_total_all','total_ints_all','total_sA1_all','total_sA11_all', ...
-             'CGlon_all','CGlat_all','west_of_170_all','east_of_170_all', ...
-             'AVO_95_CI_all')
+% save([data_path,'AVO_data_through_',num2str(current_year)],'ship_list_all','survey_list_all','all_years_all', ...
+%              'grid_count_all','grid_count1_all','grid_count11_all', ...
+%              'scaler_all','scaler1_all','scaler11_all', ...
+%              'index_all','index_ss1_all','index_ss11_all', ...
+%              'index_min_applied_all','index_min_applied1_all','index_min_applied11_all', ...
+%              'rej_min_pings_all','rej_max_time_all','rej_total_all','total_ints_all','total_sA1_all','total_sA11_all', ...
+%              'CGlon_all','CGlat_all','west_of_170_all','east_of_170_all', ...
+%              'AVO_95_CI_all')
 
 %% Generate figures for the preliminary report
 load([data_path,'AT_data'])
@@ -55,22 +55,23 @@ load([data_path,'AT_data'])
 % Figure 1 -- AT time series on the top and AVO time series on the bottom
 f = figure;
 f.Position = [100 100 1000 2000];
-subplot(2,1,1)
+subplot(2,1,2)
 plot(AT_years, AT_index, 'ko-', 'markerfacecolor', 'k')
 hold on
 errorbar(AT_years,AT_index,AT_95_CI,'k')
-xlim([min(AT_years),max(all_years)])
+xlim([min(AT_years),max(all_years)+1])
 ylabel('Million metric tons')
 set(gca,'fontsize',24)
 set(gca,'FontName','Times New Roman')
 ylim([0,5.2])
-subplot(2,1,2)
+subplot(2,1,1)
 plot(all_years_all,index_all, 'ko-', 'markerfacecolor', 'k')
 hold on
-plot(all_years_all(end),index_all(end),'mo','markerfacecolor','m','markersize',10)
+plot(all_years_all(end-1:end),index_all(end-1:end),'mo','markerfacecolor','m','markersize',10)
 hold on
-errorbar(all_years_all(1:end-1),index_all(1:end-1),AVO_95_CI,'k')
-xlim([min(AT_years),max(all_years)])
+% errorbar(all_years_all(1:end-1),index_all(1:end-1),AVO_95_CI,'k')
+errorbar(all_years_all,index_all,AVO_95_CI,'k')
+xlim([min(AT_years),max(all_years)+1])
 ylabel('Total backscatter (m^{2})')
 set(gca,'fontsize',24)
 set(gca,'FontName','Times New Roman')
@@ -109,7 +110,7 @@ figure
 subplot(1,2,1)
 bar(all_years_all,W_prop);
 hold on
-bar(all_years_all(end),W_prop(end),'k')
+bar(all_years_all(end-1:end),W_prop(end-1:end),'k')
 title('West of the Pribilof Islands (170^{o} W)')
 ylabel('Percent of pollock backscatter')
 set(gca,'fontsize',20)
@@ -119,7 +120,7 @@ ylim([0,100])
 subplot(1,2,2)
 bar(all_years_all,E_prop);
 hold on
-bar(all_years_all(end),E_prop(end),'k')
+bar(all_years_all(end-1:end),E_prop(end-1:end),'k')
 title('East of the Pribilof Islands (170^{o} W)')
 ylim([0,100])
 set(gca,'fontsize',20)

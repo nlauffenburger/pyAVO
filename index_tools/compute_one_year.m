@@ -221,7 +221,7 @@ if plot_nasc_track
     title(sprintf('%s AVO pollock backscatter (38 kHz s_A, m^2 nmi^-^2)',num2str(cur_year)))
     set(gca,'fontsize',18)
     orient portrait
-    pngfile=[output_path,sprintf('%s-nasc-map.png',num2str(cur_year))];
+    pngfile=[output_path,sprintf('%s-nasc-map-Spectral.png',num2str(cur_year))];
     print('-dpng','-r90',pngfile);
 end
 
@@ -270,7 +270,7 @@ if plot_nasc_grid
             cell_location.lat_perimeter(j,1)=grid_cell_definitions.lat_perimeter(loc);
         end
     end 
-    colormap(jet)
+    colormap(flipud(brewermap([],'Spectral')))
     for p=1:length(cell_location.lon_center)
         [x,y]=m_ll2xy(cell2mat(cell_location.lon_perimeter(p)),cell2mat(cell_location.lat_perimeter(p)));
         plot(x,y,'k')
@@ -283,14 +283,14 @@ if plot_nasc_grid
             s.SizeData = 200;
         end
     end
-    caxis([0,4])
+    caxis([1,3.5])
     h = colorbar;
     h.Ticks = [0,1,2,3,4];
     h.TickLabels = [0,10,100,1000,10000];
     title(sprintf('%s AVO mean grid pollock backscatter (38 kHz s_A, m^2 nmi^-^2)',num2str(cur_year)))
     set(gca,'fontsize',18)
     orient portrait
-    pngfile=[output_path,sprintf('%s-mean_nasc_grid.png',num2str(cur_year))];
+    pngfile=[output_path,sprintf('%s-mean_nasc_grid-Spectral.png',num2str(cur_year))];
     print('-dpng','-r90',pngfile);
 end
 
